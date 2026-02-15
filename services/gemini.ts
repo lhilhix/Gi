@@ -24,29 +24,32 @@ export class AIService {
     this.ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
   }
 
-  private isGeminiModel(modelId: ModelId): boolean {
-    return modelId.startsWith('gemini-');
-  }
-
-  private isHFModel(modelId: ModelId): boolean {
-    return modelId.startsWith('mistralai/') || modelId.startsWith('meta-llama/');
-  }
-
   async sendMessageStream(
     modelId: ModelId,
     history: { role: 'user' | 'model'; parts: MessagePart[] }[],
     prompt: string,
     onChunk: (text: string) => void,
     onComplete: (fullResponse: any) => void,
-    options?: { useSearch?: boolean, useMaps?: boolean, location?: LocationData, keys?: ProviderKeys }
+    options?: { 
+      useSearch?: boolean, 
+      useMaps?: boolean, 
+      location?: LocationData, 
+      keys?: ProviderKeys,
+      provider?: string 
+    }
   ) {
-    if (this.isGeminiModel(modelId)) {
+    const provider = options?.provider;
+
+    if (provider === 'google' || modelId.startsWith('gemini-')) {
       this.refreshGoogleAI();
       return this.sendGeminiMessage(modelId, history, prompt, onChunk, onComplete, options);
-    } else if (this.isHFModel(modelId)) {
+    } else if (provider === 'huggingface' || modelId.includes('/') ) {
       return this.sendHuggingFaceMessage(modelId, history, prompt, onChunk, onComplete, options?.keys);
+    } else if (provider === 'groq' || provider === 'cerebras') {
+      return this.sendOpenAIMessage(modelId, history, prompt, onChunk, onComplete, options?.keys, provider);
     } else {
-      return this.sendOpenAIMessage(modelId, history, prompt, onChunk, onComplete, options?.keys);
+      // Fallback for unexpected cases
+      throw new Error(`Unknown provider for model: ${modelId}`);
     }
   }
 
@@ -136,40 +139,24 @@ export class AIService {
         },
         body: JSON.stringify({
           inputs: prompt,
-          parameters: { return_full_text: false, max_new_tokens: 500 },
-          stream: true
+          parameters: { return_full_text: false, max_new_tokens: 1024 },
+          stream: false 
         })
       });
 
-      if (!response.ok) throw new Error(`HF Error: ${response.status}`);
-
-      const reader = response.body?.getReader();
-      if (!reader) throw new Error("No reader available");
-
-      const decoder = new TextDecoder();
-      let fullContent = '';
-
-      // Standard HF Inference API streaming is sometimes different per model, 
-      // but many common ones return a series of JSON objects.
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value);
-        // Note: Simple parsing for HF Server-Sent Events or multi-JSON chunks
-        const parts = chunk.split('\n').filter(p => p.trim());
-        for (const part of parts) {
-          try {
-            const json = JSON.parse(part.replace(/^data:/, ''));
-            const text = json.token?.text || json[0]?.generated_text || '';
-            if (text) {
-              fullContent += text;
-              onChunk(text);
-            }
-          } catch (e) { /* partial chunk */ }
-        }
+      if (!response.ok) {
+         const errText = await response.text();
+         console.error("HF API Error Text:", errText);
+         throw new Error(`HF Error: ${response.status}`);
       }
-      onComplete({ text: fullContent });
+
+      const result = await response.json();
+      const text = Array.isArray(result) ? result[0]?.generated_text : result.generated_text;
+      
+      if (text) {
+        onChunk(text);
+        onComplete({ text });
+      }
     } catch (error) {
       console.error("HF Inference Error:", error);
       throw error;
@@ -182,9 +169,10 @@ export class AIService {
     prompt: string,
     onChunk: (text: string) => void,
     onComplete: (fullResponse: any) => void,
-    keys?: ProviderKeys
+    keys?: ProviderKeys,
+    provider?: string
   ) {
-    const isGroq = modelId.includes('llama-3.3');
+    const isGroq = provider === 'groq';
     const endpoint = isGroq 
       ? "https://api.groq.com/openai/v1/chat/completions" 
       : "https://api.cerebras.ai/v1/chat/completions";
@@ -219,6 +207,8 @@ export class AIService {
       });
 
       if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("OpenAI-Compatible Error Detail:", errorData);
         if (response.status === 403) throw new Error("CORS_OR_FORBIDDEN");
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -238,7 +228,7 @@ export class AIService {
 
         for (const line of lines) {
           if (line.startsWith('data: ')) {
-            const data = line.slice(6);
+            const data = line.slice(6).trim();
             if (data === '[DONE]') continue;
             try {
               const json = JSON.parse(data);

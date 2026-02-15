@@ -2,7 +2,7 @@
 export enum ModelId {
   GEMINI_3_FLASH = 'gemini-3-flash-preview',
   GEMINI_3_PRO = 'gemini-3-pro-preview',
-  GEMINI_2_5_FLASH = 'gemini-2.5-flash',
+  GEMINI_2_5_FLASH = 'gemini-2.5-flash-preview-12-2024',
   GEMINI_IMAGE = 'gemini-2.5-flash-image',
   GROQ_LLAMA_3_3 = 'llama-3.3-70b-versatile',
   CEREBRAS_LLAMA_3_1_70B = 'llama3.1-70b',

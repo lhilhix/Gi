@@ -377,7 +377,8 @@ export default function App() {
             useSearch: useSearch && currentModel.provider === 'google',
             useMaps: useMaps && currentModel.provider === 'google',
             location: useMaps ? location : undefined,
-            keys: keys
+            keys: keys,
+            provider: currentModel.provider
           }
         );
       }
@@ -393,6 +394,8 @@ export default function App() {
         errorMessage = `Error (403): Access Forbidden. Note: Local browsers may block direct Groq/Cerebras requests due to CORS.`;
       } else if (err.message.includes("401") || err.message.toLowerCase().includes("unauthorized")) {
         errorMessage = "Error (401): Invalid API Key. Please check your credentials in Settings.";
+      } else if (err.message.includes("404")) {
+        errorMessage = `Error (404): Model "${selectedModel}" not found. The provider might have changed their model list.`;
       }
       
       setSessions(prev => prev.map(s => 
