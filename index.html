@@ -47,13 +47,19 @@
         .token.bold { font-weight: bold; }
         .token.italic { font-style: italic; }
 
-        /* Search Highlight Styles */
+        /* Enhanced Search Highlight Styles */
         .search-highlight {
-            background-color: rgba(99, 102, 241, 0.3);
-            color: #818cf8;
+            background-color: #fbbf24; /* Amber 400 */
+            color: #0f172a; /* Slate 950 */
             border-radius: 2px;
-            padding: 0 1px;
-            font-weight: 600;
+            padding: 0 2px;
+            font-weight: 700;
+            box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.4);
+        }
+        .light-mode .search-highlight {
+            background-color: #fde047; /* Yellow 300 */
+            color: #1e293b; /* Slate 800 */
+            box-shadow: 0 0 0 1px rgba(253, 224, 71, 0.6);
         }
     </style>
 <script type="importmap">

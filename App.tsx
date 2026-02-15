@@ -424,6 +424,26 @@ export default function App() {
     return titleMatch || messageMatch;
   }), [sessions, sidebarSearchQuery]);
 
+  // Helper to extract a relevant snippet from the message history for search display
+  const getSearchSnippet = useCallback((session: ChatSession, query: string) => {
+    if (!query) return null;
+    const lowerQuery = query.toLowerCase();
+    const matchingMessage = session.messages.find(m => m.content.toLowerCase().includes(lowerQuery));
+    if (!matchingMessage) return null;
+
+    const content = matchingMessage.content;
+    const index = content.toLowerCase().indexOf(lowerQuery);
+    const padding = 30;
+    const start = Math.max(0, index - padding);
+    const end = Math.min(content.length, index + lowerQuery.length + padding);
+    
+    let snippet = content.substring(start, end).replace(/\n/g, ' ');
+    if (start > 0) snippet = '...' + snippet;
+    if (end < content.length) snippet = snippet + '...';
+    
+    return snippet;
+  }, []);
+
   const isDark = theme === 'dark';
 
   return (
@@ -480,37 +500,40 @@ export default function App() {
               </p>
             </div>
           ) : (
-            filteredSessions.map(session => (
-              <div 
-                key={session.id}
-                onClick={() => setActiveSessionId(session.id)}
-                className={`group flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all border ${
-                  activeSessionId === session.id 
-                  ? 'bg-indigo-600/10 text-indigo-400 border-indigo-500/20 shadow-sm' 
-                  : `border-transparent ${isDark ? 'hover:bg-slate-800/40 text-slate-400' : 'hover:bg-slate-50 text-slate-600'}`
-                }`}
-              >
-                <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-                  <div className="flex items-center gap-2 overflow-hidden">
-                    <MessageSquare className="w-4 h-4 flex-shrink-0" />
-                    <span className="truncate text-sm font-medium">
-                      <HighlightedText text={session.title} query={sidebarSearchQuery} />
-                    </span>
-                  </div>
-                  {sidebarSearchQuery && session.messages.some(m => m.content.toLowerCase().includes(sidebarSearchQuery.toLowerCase())) && (
-                    <span className="text-[10px] opacity-60 truncate pl-6 italic">
-                      Match found in messages
-                    </span>
-                  )}
-                </div>
-                <button 
-                  onClick={(e) => deleteSession(session.id, e)}
-                  className="opacity-0 group-hover:opacity-100 hover:text-red-400 transition-opacity p-1 ml-2"
+            filteredSessions.map(session => {
+              const snippet = getSearchSnippet(session, sidebarSearchQuery);
+              return (
+                <div 
+                  key={session.id}
+                  onClick={() => setActiveSessionId(session.id)}
+                  className={`group flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all border ${
+                    activeSessionId === session.id 
+                    ? 'bg-indigo-600/10 text-indigo-400 border-indigo-500/20 shadow-sm' 
+                    : `border-transparent ${isDark ? 'hover:bg-slate-800/40 text-slate-400' : 'hover:bg-slate-50 text-slate-600'}`
+                  }`}
                 >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            ))
+                  <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      <MessageSquare className="w-4 h-4 flex-shrink-0" />
+                      <span className="truncate text-sm font-medium">
+                        <HighlightedText text={session.title} query={sidebarSearchQuery} />
+                      </span>
+                    </div>
+                    {snippet && (
+                      <span className="text-[10px] opacity-60 truncate pl-6 italic font-normal">
+                        <HighlightedText text={snippet} query={sidebarSearchQuery} />
+                      </span>
+                    )}
+                  </div>
+                  <button 
+                    onClick={(e) => deleteSession(session.id, e)}
+                    className="opacity-0 group-hover:opacity-100 hover:text-red-400 transition-opacity p-1 ml-2"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              );
+            })
           )}
         </div>
 
