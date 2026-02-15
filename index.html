@@ -13,6 +13,7 @@
             font-family: 'Inter', sans-serif;
             background-color: #0f172a;
             color: #f1f5f9;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         .glass {
             background: rgba(30, 41, 59, 0.7);
@@ -32,6 +33,28 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #475569;
         }
+
+        /* Prism.js Syntax Highlighting Tokens */
+        .token.comment, .token.prolog, .token.doctype, .token.cdata { color: #64748b; font-style: italic; }
+        .token.punctuation { color: #94a3b8; }
+        .token.namespace { opacity: .7; }
+        .token.property, .token.tag, .token.boolean, .token.number, .token.constant, .token.symbol, .token.deleted { color: #f472b6; }
+        .token.selector, .token.attr-name, .token.string, .token.char, .token.builtin, .token.inserted { color: #4ade80; }
+        .token.operator, .token.entity, .token.url, .language-css .token.string, .style .token.string { color: #94a3b8; }
+        .token.atrule, .token.attr-value, .token.keyword { color: #818cf8; }
+        .token.function, .token.class-name { color: #fbbf24; }
+        .token.regex, .token.important, .token.variable { color: #e879f9; }
+        .token.bold { font-weight: bold; }
+        .token.italic { font-style: italic; }
+
+        /* Search Highlight Styles */
+        .search-highlight {
+            background-color: rgba(99, 102, 241, 0.3);
+            color: #818cf8;
+            border-radius: 2px;
+            padding: 0 1px;
+            font-weight: 600;
+        }
     </style>
 <script type="importmap">
 {
@@ -40,7 +63,9 @@
     "react/": "https://esm.sh/react@^19.2.4/",
     "react": "https://esm.sh/react@^19.2.4",
     "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
-    "@google/genai": "https://esm.sh/@google/genai@^1.40.0"
+    "@google/genai": "https://esm.sh/@google/genai@^1.40.0",
+    "prismjs": "https://esm.sh/prismjs@1.29.0",
+    "prismjs/": "https://esm.sh/prismjs@^1.30.0/"
   }
 }
 </script>

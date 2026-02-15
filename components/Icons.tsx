@@ -12,9 +12,26 @@ import {
   MessageSquare, 
   Trash2, 
   ChevronRight,
+  ChevronDown,
   Loader2,
   Paperclip,
-  ExternalLink
+  ExternalLink,
+  PanelLeft,
+  Layout,
+  Settings,
+  Check,
+  Zap,
+  Activity,
+  X,
+  AlertTriangle,
+  MapPin,
+  Compass,
+  Mic,
+  HelpCircle,
+  Moon,
+  Sun,
+  Copy,
+  CheckCircle2
 } from 'lucide-react';
 
 export { 
@@ -29,7 +46,24 @@ export {
   MessageSquare, 
   Trash2, 
   ChevronRight,
+  ChevronDown, 
   Loader2,
   Paperclip,
-  ExternalLink
+  ExternalLink,
+  PanelLeft,
+  Layout,
+  Settings,
+  Check,
+  Zap,
+  Activity,
+  X,
+  AlertTriangle,
+  MapPin,
+  Compass,
+  Mic,
+  HelpCircle,
+  Moon,
+  Sun,
+  Copy,
+  CheckCircle2
 };

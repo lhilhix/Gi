@@ -1,8 +1,9 @@
 {
-  "name": "Copy of Copy of Gemini Multi-Model Hub",
-  "description": "A sophisticated multi-model chat interface allowing users to interact with Gemini 3 Flash, Pro, and Gemini 2.5 Flash Image generation in a single unified workspace.",
+  "name": "Gemini Multi-Model Hub Pro",
+  "description": "A sophisticated multi-model chat interface with Google Search and Maps grounding, and ultra-fast inference from Groq and Cerebras.",
   "requestFramePermissions": [
     "camera",
-    "microphone"
+    "microphone",
+    "geolocation"
   ]
 }
